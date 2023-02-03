@@ -6,7 +6,7 @@ from ukrainian_word_stress import Stressifier, StressSymbol
 import sys
 
 
-origins = ["http://127.0.0.1/api/stress"]
+origins = ['*']
 middleware = [
     Middleware(
         CORSMiddleware,
@@ -19,7 +19,7 @@ middleware = [
 app = FastAPI(middleware=middleware)
 
 stressify = Stressifier(stress_symbol=StressSymbol.CombiningAcuteAccent)
-print("ukr-nlp-api available", file=sys.stderr)
+print("Loaded stress dictionary", file=sys.stderr)
 
 
 class StringToStress(BaseModel):
@@ -28,7 +28,8 @@ class StringToStress(BaseModel):
 
 @app.post("/api/stress")
 async def stressify_text(item: StringToStress):
-    # print("before", file=sys.stderr)
+    # print("<", item.text, file=sys.stderr)
     stressedText = {"stressedtext": stressify(item.text)}
     # print(">", stressedText, file=sys.stderr)
     return stressedText
+
