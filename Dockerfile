@@ -1,11 +1,16 @@
-FROM python:3
+FROM python:3.9-slim as base
+FROM base as builder
+COPY requirements.txt /requirements.txt
+RUN pip install --no-cache-dir --user -r /requirements.txt
 
-RUN apk update
+FROM base
+# copy only the dependencies installation from the 1st stage image
+COPY --from=builder /root/.local /root/.local
+RUN mkdir /app
+COPY main.py /app
+WORKDIR /app
 
-ADD requirements.txt /
-RUN pip3 install -r requirements.txt
-ADD main.py /
-ADD start-server.sh /
+# update PATH environment variable
+ENV PATH=/home/app/.local/bin:$PATH
 
-EXPOSE 5000
-CMD [ "./start-server.sh"]
+CMD [ "uvicorn", "main:app", "--port", "80", "--host", "0.0.0.0", "--log-level", "debug" ]
